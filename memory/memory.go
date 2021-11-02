@@ -33,6 +33,7 @@ func (m *MemoryCache) Save(key string, data parent.Data) (err error) {
 	if data.CreatedAt.IsZero() {
 		data.CreatedAt = time.Now()
 	}
+	data.Key = key
 	m.items[key] = data
 	return nil
 }
@@ -63,7 +64,7 @@ func (m *MemoryCache) startGC() {
 	tc := time.NewTicker(m.expirationInterval)
 	for t := range tc.C {
 		for key, item := range m.items {
-			if item.ExpiresAt.After(t) {
+			if item.ExpiresAt.Before(t) {
 				m.Delete(key)
 			}
 		}
