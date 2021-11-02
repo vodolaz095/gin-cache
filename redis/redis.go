@@ -16,6 +16,7 @@ const DefaultConnectionString = "redis://127.0.0.1:6379/0"
 
 // Cache is redis storage engine
 type Cache struct {
+	prefix string
 	client *redis.Client
 }
 
@@ -52,8 +53,8 @@ func ParseConnectionString(connectionString string) (options redis.Options, err 
 }
 
 // New creates new redis caching driver
-func New(redisConnectionString string) (rc *Cache, err error) {
-	rc = &Cache{}
+func New(redisConnectionString, prefix string) (rc *Cache, err error) {
+	rc = &Cache{prefix: prefix}
 	opts, err := ParseConnectionString(redisConnectionString)
 	if err != nil {
 		return
@@ -72,8 +73,9 @@ func New(redisConnectionString string) (rc *Cache, err error) {
 
 // Save saves item in cache
 func (rc *Cache) Save(key string, data parent.Data) (err error) {
-	_, err = rc.client.HMSet(key, map[string]interface{}{
-		"key":         data.Key,
+	prefixedKey := fmt.Sprintf("%s%s", rc.prefix, key)
+	_, err = rc.client.HMSet(prefixedKey, map[string]interface{}{
+		"key":         key,
 		"body":        string(data.Body),
 		"status":      fmt.Sprintf("%v", data.Status),
 		"contentType": data.ContentType,
@@ -83,12 +85,13 @@ func (rc *Cache) Save(key string, data parent.Data) (err error) {
 	if err != nil {
 		return
 	}
-	_, err = rc.client.ExpireAt(key, data.ExpiresAt).Result()
+	_, err = rc.client.ExpireAt(prefixedKey, data.ExpiresAt).Result()
 	return
 }
 
 // Get extracts item from cache
 func (rc *Cache) Get(key string) (data parent.Data, found bool, err error) {
+	key = fmt.Sprintf("%s%s", rc.prefix, key)
 	data = parent.Data{}
 	raw, err := rc.client.HGetAll(key).Result()
 	if err != nil {
@@ -98,14 +101,13 @@ func (rc *Cache) Get(key string) (data parent.Data, found bool, err error) {
 		return data, false, nil
 	}
 	found = true
-	data.Key = key
+	data.Key = raw["key"]
 	data.ContentType = raw["contentType"]
 	status, err := strconv.ParseInt(raw["status"], 10, 16)
 	if err != nil {
 		return
 	}
 	data.Status = int(status)
-
 	data.Body = []byte(raw["body"])
 	createdAt, err := time.Parse(time.RFC1123, raw["createdAt"])
 	if err != nil {
@@ -122,5 +124,6 @@ func (rc *Cache) Get(key string) (data parent.Data, found bool, err error) {
 
 // Delete deletes item from cache
 func (rc *Cache) Delete(key string) (err error) {
+	key = fmt.Sprintf("%s%s", rc.prefix, key)
 	return rc.client.Del(key).Err()
 }

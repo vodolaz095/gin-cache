@@ -12,7 +12,7 @@ var testMemoryStore *Cache
 
 func TestNew(t *testing.T) {
 	var err error
-	testMemoryStore, err = New(DefaultConnectionString)
+	testMemoryStore, err = New(DefaultConnectionString, "HolyMeat")
 	if err != nil {
 		t.Errorf("%s : while dialing redis", err)
 	}
