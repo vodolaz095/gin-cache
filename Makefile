@@ -8,8 +8,9 @@ deps:
 	golint
 
 	# installing golang dependencies using golang modules
-	go mod tidy # ensure go.mod is sane
+	go mod download # ensure dependencies are present
 	go mod verify # ensure dependencies are present
+	go mod tidy # ensure go.mod is sane
 
 lint:
 	gofmt  -w=true -s=true -l=true ./

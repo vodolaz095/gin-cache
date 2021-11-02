@@ -1,4 +1,4 @@
-package memory
+package rcache
 
 import (
 	"net/http"
@@ -11,16 +11,14 @@ import (
 var testMemoryStore *Cache
 
 func TestNew(t *testing.T) {
-	testMemoryStore = New(time.Second)
-	if testMemoryStore.expirationInterval != time.Second {
-		t.Error("wrong expiration duration")
-	}
-	if len(testMemoryStore.items) != 0 {
-		t.Error("items present?")
+	var err error
+	testMemoryStore, err = New(DefaultConnectionString)
+	if err != nil {
+		t.Errorf("%s : while dialing redis", err)
 	}
 }
 
-func TestMemoryCache_Save(t *testing.T) {
+func TestCache_Save(t *testing.T) {
 	err := testMemoryStore.Save("a", parent.Data{
 		Body:        []byte("this is body of a key"),
 		Status:      http.StatusTeapot,
@@ -31,15 +29,9 @@ func TestMemoryCache_Save(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if len(testMemoryStore.items) != 1 {
-		t.Error("key length is wrong?")
-	}
-	if testMemoryStore.items["a"].Key != "a" {
-		t.Error("wrongly saved?")
-	}
 }
 
-func TestMemoryCache_Get(t *testing.T) {
+func TestCache_Get(t *testing.T) {
 	var hit parent.Data
 	var err error
 	var found bool
@@ -65,8 +57,10 @@ func TestMemoryCache_Get(t *testing.T) {
 	}
 }
 
-func TestMemoryCache_Delete(t *testing.T) {
-	err := testMemoryStore.Save("b", parent.Data{
+func TestCache_Delete(t *testing.T) {
+	var err error
+	var found bool
+	err = testMemoryStore.Save("b", parent.Data{
 		Body:        []byte("this is body of a key"),
 		Status:      http.StatusTeapot,
 		ContentType: "text/plain",
@@ -76,26 +70,19 @@ func TestMemoryCache_Delete(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if len(testMemoryStore.items) != 2 {
-		t.Error("key length wrong?")
+	_, found, err = testMemoryStore.Get("b")
+	if err != nil {
+		t.Error(err)
 	}
-	if testMemoryStore.items["a"].Key != "a" {
-		t.Error("wrongly saved?")
+	if !found {
+		t.Error("key not found")
 	}
-	if testMemoryStore.items["b"].Key != "b" {
-		t.Error("wrongly saved?")
-	}
+
 	err = testMemoryStore.Delete("b")
 	if err != nil {
 		t.Error(err)
 	}
-	if len(testMemoryStore.items) != 1 {
-		t.Error("key length wrong?")
-	}
-	if testMemoryStore.items["a"].Key != "a" {
-		t.Error("wrongly saved?")
-	}
-	_, found, err := testMemoryStore.Get("b")
+	_, found, err = testMemoryStore.Get("b")
 	if err != nil {
 		t.Error(err)
 	}
@@ -107,9 +94,6 @@ func TestMemoryCache_Delete(t *testing.T) {
 func TestExpires(t *testing.T) {
 	time.Sleep(time.Second)
 	time.Sleep(time.Second)
-	if len(testMemoryStore.items) != 0 {
-		t.Error("key length wrong?")
-	}
 	_, found, err := testMemoryStore.Get("a")
 	if err != nil {
 		t.Error(err)

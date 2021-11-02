@@ -1,4 +1,4 @@
-package cache
+package memory
 
 import (
 	"sync"
@@ -7,16 +7,16 @@ import (
 	parent "github.com/vodolaz095/gin-cache"
 )
 
-// MemoryCache is memory cache storage engine
-type MemoryCache struct {
+// Cache is memory cache storage engine
+type Cache struct {
 	sync.RWMutex
 	items              map[string]parent.Data
 	expirationInterval time.Duration
 }
 
 // New creates memory cache driver
-func New(expirationInterval time.Duration) *MemoryCache {
-	cache := MemoryCache{
+func New(expirationInterval time.Duration) *Cache {
+	cache := Cache{
 		items:              make(map[string]parent.Data),
 		expirationInterval: expirationInterval,
 	}
@@ -27,7 +27,7 @@ func New(expirationInterval time.Duration) *MemoryCache {
 }
 
 // Save saves item in cache
-func (m *MemoryCache) Save(key string, data parent.Data) (err error) {
+func (m *Cache) Save(key string, data parent.Data) (err error) {
 	m.Lock()
 	defer m.Unlock()
 	if data.CreatedAt.IsZero() {
@@ -39,7 +39,7 @@ func (m *MemoryCache) Save(key string, data parent.Data) (err error) {
 }
 
 // Get extracts item from cache
-func (m *MemoryCache) Get(key string) (data parent.Data, found bool, err error) {
+func (m *Cache) Get(key string) (data parent.Data, found bool, err error) {
 	m.RLock()
 	defer m.RUnlock()
 	data, found = m.items[key]
@@ -50,7 +50,7 @@ func (m *MemoryCache) Get(key string) (data parent.Data, found bool, err error) 
 }
 
 // Delete deletes item from cache
-func (m *MemoryCache) Delete(key string) (err error) {
+func (m *Cache) Delete(key string) (err error) {
 	m.Lock()
 	defer m.Unlock()
 	_, found := m.items[key]
@@ -60,7 +60,7 @@ func (m *MemoryCache) Delete(key string) (err error) {
 	return
 }
 
-func (m *MemoryCache) startGC() {
+func (m *Cache) startGC() {
 	tc := time.NewTicker(m.expirationInterval)
 	for t := range tc.C {
 		for key, item := range m.items {
