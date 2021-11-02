@@ -19,4 +19,4 @@ check: lint
 test: check
 
 start:
-	go run exampe/cmd/main.go
+	go run example/cmd/main.go

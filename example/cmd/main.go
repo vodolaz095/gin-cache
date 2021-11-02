@@ -25,10 +25,11 @@ func main() {
 		c.Next()
 	})
 
-	// Memory cache usage examole
+	// Memory cache usage example
 	r1 := app.Group("/memoryCache")
 	r1.Use(cache.New(memoryCache, cache.CacheByPath(time.Second)))
-	r1.GET("/", func(c *gin.Context) {
+	// this will be cached with key `/memoryCache/time` and ttl 1 second
+	r1.GET("/time", func(c *gin.Context) {
 		c.String(http.StatusOK, "Memory cache used! Current time is %s", time.Now().Format(time.Stamp))
 	})
 
@@ -44,15 +45,15 @@ func main() {
 		// using string representation of user parameter as cache key
 		return fmt.Sprint(user), 15 * time.Second, nil
 	}))
-	r2.GET("/", func(c *gin.Context) {
+	r2.GET("/time", func(c *gin.Context) {
 		c.String(http.StatusOK, "Redis Cache used! Current time is %s", time.Now().Format(time.Stamp))
 	})
 
 	app.NoRoute(func(c *gin.Context) {
 		c.Status(http.StatusOK)
 		fmt.Fprintln(c.Writer, "<html><body>")
-		fmt.Fprintln(c.Writer, " <p><a href=\"/memoryCache/\">Test memory cache</p>")
-		fmt.Fprintln(c.Writer, " <p><a href=\"/redisCache/\">Test redis cache</p>")
+		fmt.Fprintln(c.Writer, " <p><a href=\"/memoryCache/time\">Test memory cache</p>")
+		fmt.Fprintln(c.Writer, " <p><a href=\"/redisCache/time\">Test redis cache</p>")
 		fmt.Fprintln(c.Writer, "</body></html>")
 		c.Abort()
 	})
