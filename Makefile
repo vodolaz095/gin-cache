@@ -3,10 +3,6 @@ deps:
 	go version
 	go env
 
-	# installing golint code quality tools and checking, if it can be started
-	cd ~ && go get -u golang.org/x/lint/golint
-	golint
-
 	# installing golang dependencies using golang modules
 	go mod download # ensure dependencies are present
 	go mod verify # ensure dependencies are present
@@ -22,5 +18,5 @@ check: lint
 
 test: check
 
-bench:
-	go test -test.bench=.*
+start:
+	go run exampe/cmd/main.go
