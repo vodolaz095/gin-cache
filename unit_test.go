@@ -155,12 +155,12 @@ func TestGetCached(t *testing.T) {
 	}
 	if testCacheEntryCreatedAt != resp.Header.Get("Last-Modified") {
 		t.Logf("Expected: %s", testCacheEntryCreatedAt)
-		t.Logf("Recieved: %s", resp.Header.Get("Last-Modified"))
+		t.Logf("Received: %s", resp.Header.Get("Last-Modified"))
 		t.Error("cache returned wrong Last-Modified")
 	}
 	if testCacheEntryExpiresAt != resp.Header.Get("Expires") {
 		t.Logf("Expected: %s", testCacheEntryExpiresAt)
-		t.Logf("Recieved: %s", resp.Header.Get("Expires"))
+		t.Logf("Received: %s", resp.Header.Get("Expires"))
 		t.Error("cache returned wrong Expires")
 	}
 }
