@@ -14,7 +14,7 @@ type Data struct {
 	ExpiresAt   time.Time
 }
 
-// Cache is interface to be used with different caching backends
+// Cache is interface to be used with different caching backends. Currently, `memory` and `redis` backends are provided
 type Cache interface {
 	Save(key string, data Data) (err error)
 	Get(key string) (data Data, found bool, err error)
