@@ -7,7 +7,7 @@ Module is inspired by this excellent npm package [express-view-cache](https://ww
 [![Go Report Card](https://goreportcard.com/badge/github.com/vodolaz095/gin-cache)](https://goreportcard.com/report/github.com/vodolaz095/gin-cache)
 
 
-Shameless advertisement
+Advertisement
 ====================================
 You can hire the author of this package by Upwork - 
 [https://www.upwork.com/freelancers/~0120ba573d09c66c51](https://www.upwork.com/freelancers/~0120ba573d09c66c51)

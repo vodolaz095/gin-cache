@@ -11,7 +11,7 @@ import (
 	parent "github.com/vodolaz095/gin-cache"
 )
 
-// DefaultConnectionString is usual way to connect to redis running on 127.0.0.1:6379 without password authentication, and we use database 0
+// DefaultConnectionString is a usual way to connect to redis running on 127.0.0.1:6379 without password authentication, and we use database 0
 const DefaultConnectionString = "redis://127.0.0.1:6379/0"
 
 // Cache is redis storage engine
