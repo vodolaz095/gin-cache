@@ -1,6 +1,6 @@
 GinCache
 ====================================
-Unobtrusive solution to Gin 1.7.2 framework - cache response content in memory or in Redis database.
+Unobtrusive solution to Gin 1.19.x framework - cache response content in memory or in Redis database.
 Module is inspired by this excellent npm package [express-view-cache](https://www.npmjs.com/package/express-view-cache)
 
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/vodolaz095/gin-cache)](https://pkg.go.dev/github.com/vodolaz095/gin-cache)
