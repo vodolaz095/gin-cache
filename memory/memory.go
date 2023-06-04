@@ -1,6 +1,7 @@
 package memory
 
 import (
+	"context"
 	"sync"
 	"time"
 
@@ -27,7 +28,7 @@ func New(expirationInterval time.Duration) *Cache {
 }
 
 // Save saves item in cache
-func (m *Cache) Save(key string, data parent.Data) (err error) {
+func (m *Cache) Save(ctx context.Context, key string, data parent.Data) (err error) {
 	m.Lock()
 	defer m.Unlock()
 	if data.CreatedAt.IsZero() {
@@ -39,7 +40,7 @@ func (m *Cache) Save(key string, data parent.Data) (err error) {
 }
 
 // Get extracts item from cache
-func (m *Cache) Get(key string) (data parent.Data, found bool, err error) {
+func (m *Cache) Get(ctx context.Context, key string) (data parent.Data, found bool, err error) {
 	m.RLock()
 	defer m.RUnlock()
 	data, found = m.items[key]
@@ -50,7 +51,7 @@ func (m *Cache) Get(key string) (data parent.Data, found bool, err error) {
 }
 
 // Delete deletes item from cache
-func (m *Cache) Delete(key string) (err error) {
+func (m *Cache) Delete(ctx context.Context, key string) (err error) {
 	m.Lock()
 	defer m.Unlock()
 	_, found := m.items[key]
@@ -62,10 +63,11 @@ func (m *Cache) Delete(key string) (err error) {
 
 func (m *Cache) startGC() {
 	tc := time.NewTicker(m.expirationInterval)
+	ctx := context.Background()
 	for t := range tc.C {
 		for key, item := range m.items {
 			if item.ExpiresAt.Before(t) {
-				m.Delete(key)
+				m.Delete(ctx, key)
 			}
 		}
 	}

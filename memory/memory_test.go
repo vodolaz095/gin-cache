@@ -1,6 +1,7 @@
 package memory
 
 import (
+	"context"
 	"net/http"
 	"testing"
 	"time"
@@ -9,6 +10,7 @@ import (
 )
 
 var testMemoryStore *Cache
+var ctx context.Context
 
 func TestNew(t *testing.T) {
 	testMemoryStore = New(time.Second)
@@ -18,10 +20,11 @@ func TestNew(t *testing.T) {
 	if len(testMemoryStore.items) != 0 {
 		t.Error("items present?")
 	}
+	ctx = context.TODO()
 }
 
 func TestMemoryCache_Save(t *testing.T) {
-	err := testMemoryStore.Save("a", parent.Data{
+	err := testMemoryStore.Save(ctx, "a", parent.Data{
 		Body:        []byte("this is body of a key"),
 		Status:      http.StatusTeapot,
 		ContentType: "text/plain",
@@ -43,14 +46,14 @@ func TestMemoryCache_Get(t *testing.T) {
 	var hit parent.Data
 	var err error
 	var found bool
-	_, found, err = testMemoryStore.Get("key not found")
+	_, found, err = testMemoryStore.Get(ctx, "key not found")
 	if err != nil {
 		t.Error(err)
 	}
 	if found {
 		t.Error("key is found?")
 	}
-	hit, found, err = testMemoryStore.Get("a")
+	hit, found, err = testMemoryStore.Get(ctx, "a")
 	if err != nil {
 		t.Error(err)
 	}
@@ -66,7 +69,7 @@ func TestMemoryCache_Get(t *testing.T) {
 }
 
 func TestMemoryCache_Delete(t *testing.T) {
-	err := testMemoryStore.Save("b", parent.Data{
+	err := testMemoryStore.Save(ctx, "b", parent.Data{
 		Body:        []byte("this is body of a key"),
 		Status:      http.StatusTeapot,
 		ContentType: "text/plain",
@@ -85,7 +88,7 @@ func TestMemoryCache_Delete(t *testing.T) {
 	if testMemoryStore.items["b"].Key != "b" {
 		t.Error("wrongly saved?")
 	}
-	err = testMemoryStore.Delete("b")
+	err = testMemoryStore.Delete(ctx, "b")
 	if err != nil {
 		t.Error(err)
 	}
@@ -95,7 +98,7 @@ func TestMemoryCache_Delete(t *testing.T) {
 	if testMemoryStore.items["a"].Key != "a" {
 		t.Error("wrongly saved?")
 	}
-	_, found, err := testMemoryStore.Get("b")
+	_, found, err := testMemoryStore.Get(ctx, "b")
 	if err != nil {
 		t.Error(err)
 	}
@@ -110,7 +113,7 @@ func TestExpires(t *testing.T) {
 	if len(testMemoryStore.items) != 0 {
 		t.Error("key length wrong?")
 	}
-	_, found, err := testMemoryStore.Get("a")
+	_, found, err := testMemoryStore.Get(ctx, "a")
 	if err != nil {
 		t.Error(err)
 	}

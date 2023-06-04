@@ -1,6 +1,7 @@
 package gincache
 
 import (
+	"context"
 	"time"
 )
 
@@ -16,7 +17,7 @@ type Data struct {
 
 // Cache is interface to be used with different caching backends. Currently, `memory` and `redis` backends are provided
 type Cache interface {
-	Save(key string, data Data) (err error)
-	Get(key string) (data Data, found bool, err error)
-	Delete(key string) (err error)
+	Save(ctx context.Context, key string, data Data) (err error)
+	Get(ctx context.Context, key string) (data Data, found bool, err error)
+	Delete(ctx context.Context, key string) (err error)
 }

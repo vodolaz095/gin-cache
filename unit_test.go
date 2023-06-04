@@ -1,6 +1,7 @@
 package gincache
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -21,7 +22,7 @@ type testCacher struct {
 }
 
 // Save saves item in cache
-func (m *testCacher) Save(key string, data Data) (err error) {
+func (m *testCacher) Save(ctx context.Context, key string, data Data) (err error) {
 	fmt.Printf("TestCache: Saving %s with status %v and body %s\n", key, data.Status, string(data.Body))
 	m.Lock()
 	defer m.Unlock()
@@ -33,7 +34,7 @@ func (m *testCacher) Save(key string, data Data) (err error) {
 }
 
 // Get extracts item from cache
-func (m *testCacher) Get(key string) (data Data, found bool, err error) {
+func (m *testCacher) Get(ctx context.Context, key string) (data Data, found bool, err error) {
 	fmt.Printf("TestCache: Extracting key %s...\n", key)
 	m.RLock()
 	defer m.RUnlock()
@@ -47,7 +48,7 @@ func (m *testCacher) Get(key string) (data Data, found bool, err error) {
 }
 
 // Delete deletes item from cache
-func (m *testCacher) Delete(key string) (err error) {
+func (m *testCacher) Delete(ctx context.Context, key string) (err error) {
 	m.Lock()
 	defer m.Unlock()
 	_, found := m.items[key]
@@ -117,7 +118,7 @@ func TestEnsureKeyCreatedProperly(t *testing.T) {
 }
 
 func TestCacheGet(t *testing.T) {
-	data, found, err := testCache.Get("/time")
+	data, found, err := testCache.Get(context.Background(), "/time")
 	if err != nil {
 		t.Errorf("%s : while extracting key /time", err)
 	}

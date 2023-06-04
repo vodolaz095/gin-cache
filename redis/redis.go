@@ -1,12 +1,14 @@
 package rcache
 
 import (
+	"context"
 	"fmt"
-	"github.com/go-redis/redis"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 
 	parent "github.com/vodolaz095/gin-cache"
 )
@@ -55,12 +57,14 @@ func ParseConnectionString(connectionString string) (options redis.Options, err 
 // New creates new redis caching driver
 func New(redisConnectionString, prefix string) (rc *Cache, err error) {
 	rc = &Cache{prefix: prefix}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	opts, err := ParseConnectionString(redisConnectionString)
 	if err != nil {
 		return
 	}
 	rc.client = redis.NewClient(&opts)
-	pong, err := rc.client.Ping().Result()
+	pong, err := rc.client.Ping(ctx).Result()
 	if err != nil {
 		return
 	}
@@ -72,9 +76,9 @@ func New(redisConnectionString, prefix string) (rc *Cache, err error) {
 }
 
 // Save saves item in cache
-func (rc *Cache) Save(key string, data parent.Data) (err error) {
+func (rc *Cache) Save(ctx context.Context, key string, data parent.Data) (err error) {
 	prefixedKey := fmt.Sprintf("%s%s", rc.prefix, key)
-	_, err = rc.client.HMSet(prefixedKey, map[string]interface{}{
+	_, err = rc.client.HMSet(ctx, prefixedKey, map[string]interface{}{
 		"key":         key,
 		"body":        string(data.Body),
 		"status":      fmt.Sprintf("%v", data.Status),
@@ -85,15 +89,15 @@ func (rc *Cache) Save(key string, data parent.Data) (err error) {
 	if err != nil {
 		return
 	}
-	_, err = rc.client.ExpireAt(prefixedKey, data.ExpiresAt).Result()
+	_, err = rc.client.ExpireAt(ctx, prefixedKey, data.ExpiresAt).Result()
 	return
 }
 
 // Get extracts item from cache
-func (rc *Cache) Get(key string) (data parent.Data, found bool, err error) {
+func (rc *Cache) Get(ctx context.Context, key string) (data parent.Data, found bool, err error) {
 	key = fmt.Sprintf("%s%s", rc.prefix, key)
 	data = parent.Data{}
-	raw, err := rc.client.HGetAll(key).Result()
+	raw, err := rc.client.HGetAll(ctx, key).Result()
 	if err != nil {
 		return
 	}
@@ -123,7 +127,7 @@ func (rc *Cache) Get(key string) (data parent.Data, found bool, err error) {
 }
 
 // Delete deletes item from cache
-func (rc *Cache) Delete(key string) (err error) {
+func (rc *Cache) Delete(ctx context.Context, key string) (err error) {
 	key = fmt.Sprintf("%s%s", rc.prefix, key)
-	return rc.client.Del(key).Err()
+	return rc.client.Del(ctx, key).Err()
 }

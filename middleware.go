@@ -41,7 +41,7 @@ func New(
 		if err != nil {
 			panic(err)
 		}
-		data, found, err := cache.Get(key)
+		data, found, err := cache.Get(c.Request.Context(), key)
 		if err != nil {
 			panic(err)
 		}
@@ -67,7 +67,7 @@ func New(
 			CreatedAt:   time.Now(),
 			ExpiresAt:   time.Now().Add(ttl),
 		}
-		err = cache.Save(key, newDataToBeSaved)
+		err = cache.Save(c.Request.Context(), key, newDataToBeSaved)
 		if err != nil {
 			panic(err)
 		}
