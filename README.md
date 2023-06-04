@@ -9,8 +9,8 @@ Module is inspired by this excellent npm package [express-view-cache](https://ww
 
 Advertisement
 ====================================
-You can hire the author of this package by Upwork - 
-[https://www.upwork.com/freelancers/~0120ba573d09c66c51](https://www.upwork.com/freelancers/~0120ba573d09c66c51)
+You can support development of this module by sending me money directly
+https://www.tinkoff.ru/rm/ostroumov.anatoliy2/4HFzm76801/
 
 Why do we need this plugin and how does it work?
 ====================================
