@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 // actually, it is just an example, its never build, but if we remove build tag, it
